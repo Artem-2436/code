@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xcortex | GRADUATION - Обучение HTML</title>
+    <style>
+        :root {
+            --bg-dark: #0b1120; /* Глубокий темный фон */
+            --bg-panel: #1e293b; /* Цвет панелей */
+            --primary: #38bdf8; /* Неоновый голубой Xcortex */
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --error: #ef4444;
+            --success: #22c55e;
+            --code-tag: #f472b6; /* Розовый для тегов */
+            --code-attr: #a5f3fc; /* Голубой для атрибутов */
+            --code-text: #e2e8f0; /* Белый для текста */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 60px;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        .nav-links span {
+            margin-left: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .nav-links span:hover { color: var(--primary); }
+
+        /* --- MAIN CONTENT AREA --- */
+        main {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- WELCOME SCREEN --- */
+        #welcome-screen {
+            text-align: center;
+            max-width: 500px;
+            padding: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1.hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group {
+            position: relative;
+            margin-top: 2rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--bg-panel);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-primary {
+            margin-top: 1.5rem;
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .help-link {
+            display: block;
+            margin-top: 1rem;
+            color: var(--text-muted);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* --- EDITOR INTERFACE (Hidden by default) --- */
+        #editor-interface {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: row;
+        }
+
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #334155;
+            position: relative;
+        }
+
+        .panel-header {
+            padding: 10px 20px;
+            background: #162032;
+            border-bottom: 1px solid #334155;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Редактор кода */
+        .editor-container {
+            position: relative;
+            flex: 1;
+            background: #0f172a;
+            overflow: hidden;
+        }
+
+        textarea, .highlight-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 16px;
+            line-height: 1.6;
+            border: none;
+            resize: none;
+            white-space: pre;
+            overflow: auto;
+        }
+
+        textarea {
+            z-index: 2;
+            color: transparent; /* Текст прозрачный, виден только курсор */
+            caret-color: var(--primary);
+            background: transparent;
+            outline: none;
+        }
+
+        .highlight-layer {
+            z-index: 1;
+            pointer-events: none; /* Пропускаем клики сквозь слой подсветки */
+            color: var(--code-text);
+        }
+
+        /* Синтаксическая подсветка */
+        .token-tag { color: var(--code-tag); }
+        .token-attr { color: var(--code-attr); }
+        .token-comment { color: #64748b; font-style: italic; }
+
+        /* Ошибки */
+        .error-mark {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-bottom: 2px wavy var(--error);
+            cursor: help;
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            background-color: #334155;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 100;
+            bottom: 100%;
+            left: 0;
+            width: 250px;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid var(--error);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .error-mark:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Превью */
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white; /* Сайт внутри белый */
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            height: 40px;
+            border-top: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #64748b;
+            background: var(--bg-dark);
+        }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: var(--bg-panel);
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 600px;
+            border: 1px solid #475569;
+            position: relative;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">XCORTEX <span style="font-weight:300; color:white;">| GRADUATION</span></div>
+        <div class="nav-links">
+            <span>Обучение</span>
+            <span>Задачи</span>
+            <span>Профиль</span>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main>
+        
+        <!-- ЭКРАН 1: ПРИВЕТСТВИЕ -->
+        <div id="welcome-screen">
+            <h1 class="hero-title">Создавай будущее</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">Интерактивная платформа обучения веб-разработке от Xcortex</p>
+            
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Как к тебе обращаться?" autocomplete="off">
+                <button class="btn-primary" onclick="startLearning()">Начать обучение</button>
+                <span class="help-link" onclick="toggleHelp(true)">Как это работает? (Справка)</span>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 2: РЕДАКТОР -->
+        <div id="editor-interface">
+            <!-- Левая панель: Код -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>HTML Editor</span>
+                    <span id="status-indicator" style="color: var(--success);">● System Ready</span>
+                </div>
+                <div class="editor-container">
+                    <div class="highlight-layer" id="highlight-layer"></div>
+                    <textarea id="code-input" spellcheck="false" oninput="processCode()" onscroll="syncScroll()"></textarea>
+                </div>
+            </div>
+
+            <!-- Правая панель: Результат -->
+            <div class="panel" style="border-right: none;">
+                <div class="panel-header">
+                    <span>Live Preview</span>
+                    <span>Browser View</span>
+                </div>
+                <iframe id="preview-frame"></iframe>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        &copy; 2023 Xcortex Organization. Powered by IncludeAI. All rights reserved.
+    </footer>
+
+    <!-- МОДАЛЬНОЕ ОКНО СПРАВКИ -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="toggleHelp(false)">&times;</span>
+            <h2 style="color: var(--primary); margin-bottom: 1rem;">Основы HTML для новичков</h2>
+            <p style="margin-bottom: 10px; line-height: 1.6;">HTML — это скелет сайта. Мы используем <strong>теги</strong>, чтобы браузер понимал, где заголовок, а где картинка.</p>
+            
+            <ul style="margin-left: 20px; color: var(--text-muted); line-height: 1.8;">
+                <li><code>&lt;h1&gt;Текст&lt;/h1&gt;</code> — Самый главный заголовок.</li>
+                <li><code>&lt;p&gt;Текст&lt;/p&gt;</code> — Обычный абзац текста.</li>
+                <li><code>&lt;b&gt;Текст&lt;/b&gt;</code> — Жирный текст.</li>
+                <li><code>&lt;button&gt;Жми&lt;/button&gt;</code> — Кнопка.</li>
+            </ul>
+            <br>
+            <p style="font-size: 0.9rem; color: var(--error);">⚠️ Важно: Всегда закрывай теги! Если открыл <code>&lt;h1&gt;</code>, обязательно напиши <code>&lt;/h1&gt;</code> в конце.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- ЛОГИКА ---
+
+        const defaultCode = `<!-- Попробуй изменить этот текст -->
+<html>
+  <body>
+    <h1>Привет, мир!</h1>
+    <p>Я создаю свой первый сайт в Xcortex.</p>
+    <b>Это жирный текст</b>
+  </body>
+</html>`;
+
+        function startLearning() {
+            const nameInput = document.getElementById('username');
+            if (!nameInput.value.trim()) {
+                nameInput.style.borderColor = 'var(--error)';
+                return;
+            }
+
+            // Анимация перехода
+            document.getElementById('welcome-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('welcome-screen').style.display = 'none';
+                const editor = document.getElementById('editor-interface');
+                editor.style.display = 'flex';
+                
+                // Инициализация редактора
+                const textarea = document.getElementById('code-input');
+                textarea.value = defaultCode;
+                processCode(); // Первичная отрисовка
+            }, 500);
+        }
+
+        function toggleHelp(show) {
+            document.getElementById('help-modal').style.display = show ? 'flex' : 'none';
+        }
+
+        // --- ЯДРО ОБРАБОТКИ КОДА (XCORTEX ENGINE) ---
+
+        function syncScroll() {
+            const textarea = document.getElementById('code-input');
+            const highlightLayer = document.getElementById('highlight-layer');
+            highlightLayer.scrollTop = textarea.scrollTop;
+            highlightLayer.scrollLeft = textarea.scrollLeft;
+        }
+
+        function processCode() {
+            const textarea = document.getElementById('code-input');
+            const highlightLayer = document.getElementById('highlight-layer');
+            const previewFrame = document.getElementById('preview-frame');
+            
+            let code = textarea.value;
+
+            // 1. Обновляем превью
+            const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+            doc.open();
+            doc.write(code);
+            doc.close();
+
+            // 2. Подготовка к подсветке синтаксиса
+            // Экранируем HTML, чтобы показать его как текст
+            let htmlForDisplay = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            // 3. Запуск умной проверки ошибок
+            htmlForDisplay = checkErrorsSmart(htmlForDisplay);
+
+            // 4. Синтаксическая подсветка (раскрашиваем теги)
+            // Красим те, что не являются ошибками (простая регулярка)
+            // Примечание: Это упрощенная логика, чтобы не ломать HTML ошибок
+            if (!htmlForDisplay.includes('class="error-mark"')) {
+                 htmlForDisplay = htmlForDisplay
+                    .replace(/(&lt;\/?)(\w+)(.*?&gt;)/g, '<span class="token-tag">$1$2</span>$3')
+                    .replace(/(&lt;!--.*?--&gt;)/g, '<span class="token-comment">$1</span>');
+            }
+
+            // Добавляем перенос строки в конце для корректного отображения
+            if (code[code.length-1] === "\n") { 
+                htmlForDisplay += "&nbsp;"; 
+            }
+
+            highlightLayer.innerHTML = htmlForDisplay;
+        }
+
+        // --- СИСТЕМА ПОИСКА ОШИБОК (SMART ERROR DETECTION) ---
+        function checkErrorsSmart(html) {
+            let processed = html;
+
+            // Проверка 1: Незакрытый H1
+            // Ищем <h1> (в экранированном виде &lt;h1&gt;) и проверяем наличие закрывающего
+            if (processed.includes('&lt;h1&gt;') && !processed.includes('&lt;/h1&gt;')) {
+                processed = processed.replace('&lt;h1&gt;', 
+                    `<span class="error-mark">&lt;h1&gt;<span class="tooltip">❌ <b>Ошибка:</b> Тег &lt;h1&gt; не закрыт.<br>✅ <b>Исправление:</b> Добавь &lt;/h1&gt; после заголовка.</span></span>`);
+            }
+
+            // Проверка 2: Незакрытый P
+            if (processed.includes('&lt;p&gt;') && !processed.includes('&lt;/p&gt;')) {
+                processed = processed.replace('&lt;p&gt;', 
+                    `<span class="error-mark">&lt;p&gt;<span class="tooltip">❌ <b>Ошибка:</b> Тег абзаца &lt;p&gt; не закрыт.<br>✅ <b>Исправление:</b> Добавь &lt;/p&gt; в конце текста.</span></span>`);
+            }
+
+             // Проверка 3: Незакрытый B
+             if (processed.includes('&lt;b&gt;') && !processed.includes('&lt;/b&gt;')) {
+                processed = processed.replace('&lt;b&gt;', 
+                    `<span class="error-mark">&lt;b&gt;<span class="tooltip">❌ <b>Ошибка:</b> Тег жирности &lt;b&gt; не закрыт.<br>✅ <b>Исправление:</b> Добавь &lt;/b&gt;.</span></span>`);
+            }
+
+            // Проверка 4: Опечатка в body
+            if (processed.includes('&lt;boddy&gt;') || processed.includes('&lt;bady&gt;')) {
+                 processed = processed.replace(/&lt;b[oa]d{1,2}y?&gt;/g, 
+                    `<span class="error-mark">$&<span class="tooltip">❌ <b>Ошибка:</b> Опечатка в названии тега.<br>✅ <b>Исправление:</b> Правильно писать &lt;body&gt;.</span></span>`);
+            }
+
+            return processed;
+        }
+
+    </script>
+</body>
+</html>
