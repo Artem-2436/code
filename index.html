@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xcortex | GRADUATION</title>
+    <title>Xcortex | GRADUATION - HTML Master</title>
     <style>
         :root {
             --bg-dark: #0b1120;
@@ -29,7 +29,6 @@
             overflow: hidden;
         }
 
-        /* HEADER */
         header {
             height: 60px;
             border-bottom: 1px solid #334155;
@@ -62,12 +61,10 @@
             color: var(--primary);
         }
 
-        /* MAIN */
         main { flex: 1; position: relative; overflow: hidden; }
         .view { display: none; width: 100%; height: 100%; }
         .view.active { display: flex; }
 
-        /* === VIEW 1: WELCOME === */
         #welcome-screen {
             text-align: center;
             max-width: 500px;
@@ -109,7 +106,6 @@
         .btn-primary:hover { transform: translateY(-2px); }
         .help-link { display: block; margin-top: 1rem; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; }
 
-        /* === VIEW 2: HTML EDITOR === */
         #editor-view { flex-direction: row; }
         .panel { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #334155; }
         .panel:last-child { border-right: none; }
@@ -160,7 +156,6 @@
         .error-mark:hover .tooltip { visibility: visible; opacity: 1; }
         iframe { width: 100%; height: 100%; border: none; background: white; }
 
-        /* === VIEW 3: HOMEWORK === */
         #homework-view { flex-direction: row; }
         .tasks-sidebar {
             width: 320px;
@@ -169,12 +164,31 @@
             overflow-y: auto;
             padding: 15px;
         }
-        .tasks-sidebar h3 {
-            color: var(--primary);
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
+        }
+        .sidebar-header h3 {
+            color: var(--primary);
             font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+        }
+        .btn-reset-all {
+            padding: 5px 12px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--error);
+            color: var(--error);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-reset-all:hover {
+            background: var(--error);
+            color: white;
         }
         .progress-bar {
             height: 6px;
@@ -295,7 +309,6 @@
         .test-result.success { display: block; background: rgba(34, 197, 94, 0.15); color: var(--success); border: 1px solid var(--success); }
         .test-result.error { display: block; background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid var(--error); }
 
-        /* FOOTER */
         footer {
             height: 40px;
             border-top: 1px solid #334155;
@@ -306,10 +319,49 @@
             color: #64748b;
         }
 
-        /* MODAL */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: var(--bg-panel); padding: 2rem; border-radius: 16px; max-width: 600px; border: 1px solid #475569; position: relative; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+
+        /* Модальное окно подтверждения сброса */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .confirm-box {
+            background: var(--bg-panel);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--error);
+            text-align: center;
+            max-width: 400px;
+        }
+        .confirm-box h3 { color: var(--error); margin-bottom: 10px; }
+        .confirm-box p { color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; }
+        .confirm-buttons { display: flex; gap: 10px; justify-content: center; }
+        .btn-confirm-yes {
+            padding: 10px 25px;
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-confirm-no {
+            padding: 10px 25px;
+            background: transparent;
+            border: 1px solid #475569;
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+        }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -358,7 +410,10 @@
     <!-- HOMEWORK -->
     <div class="view" id="homework-view">
         <div class="tasks-sidebar">
-            <h3>📚 Задания</h3>
+            <div class="sidebar-header">
+                <h3>📚 Задания</h3>
+                <button class="btn-reset-all" onclick="confirmResetAll()">🗑 Сбросить всё</button>
+            </div>
             <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
             <div id="tasks-list"></div>
         </div>
@@ -369,12 +424,12 @@
             </div>
             <div class="task-editor">
                 <div class="code-editor-wrapper">
-                    <textarea id="task-code-input" spellcheck="false" placeholder="// Напиши свой код здесь..."></textarea>
+                    <textarea id="task-code-input" spellcheck="false" placeholder="<!-- Напиши свой HTML код здесь -->"></textarea>
                 </div>
             </div>
             <div class="task-actions">
                 <button class="btn-check" onclick="runTests()">▶ Проверить</button>
-                <button class="btn-reset" onclick="resetTask()">↺ Сбросить</button>
+                <button class="btn-reset" onclick="resetTask()">↺ Сбросить задание</button>
                 <div class="test-result" id="test-result"></div>
             </div>
         </div>
@@ -394,6 +449,18 @@
             <li><code>&lt;p&gt;Текст&lt;/p&gt;</code> — Абзац</li>
             <li><code>&lt;b&gt;Текст&lt;/b&gt;</code> — Жирный текст</li>
         </ul>
+    </div>
+</div>
+
+<!-- CONFIRM RESET MODAL -->
+<div class="confirm-modal" id="confirm-reset-modal">
+    <div class="confirm-box">
+        <h3>⚠️ Сбросить весь прогресс?</h3>
+        <p>Все выполненные задания будут обнулены, а написанный код — удалён. Это действие нельзя отменить.</p>
+        <div class="confirm-buttons">
+            <button class="btn-confirm-yes" onclick="executeResetAll()">Да, сбросить</button>
+            <button class="btn-confirm-no" onclick="closeConfirmReset()">Отмена</button>
+        </div>
     </div>
 </div>
 
@@ -426,7 +493,7 @@ function toggleHelp(show) {
     document.getElementById('help-modal').style.display = show ? 'flex' : 'none';
 }
 
-// ============ HTML EDITOR (упрощенно) ============
+// ============ HTML EDITOR ============
 function syncScroll() {
     const t = document.getElementById('code-input');
     const h = document.getElementById('highlight-layer');
@@ -455,31 +522,31 @@ function checkErrorsSmart(html) {
 
 // ============ HOMEWORK SYSTEM ============
 const TASKS = [
-    { id:1, title:"Сложение", desc:"Напиши функцию <code>sum(a, b)</code>, которая возвращает сумму двух чисел.", starter:"function sum(a, b) {\n  // твой код\n}", test:(fn)=>fn(2,3)===5 && fn(-1,1)===0 && fn(0,0)===0 },
-    { id:2, title:"Приветствие", desc:"Функция <code>greet(name)</code> возвращает строку <code>\"Привет, {name}!\"</code>", starter:"function greet(name) {\n  // твой код\n}", test:(fn)=>fn("Артем")==="Привет, Артем!" && fn("Мир")==="Привет, Мир!" },
-    { id:3, title:"Квадрат числа", desc:"Функция <code>square(n)</code> возвращает квадрат числа.", starter:"function square(n) {\n  // твой код\n}", test:(fn)=>fn(3)===9 && fn(0)===0 && fn(-4)===16 },
-    { id:4, title:"Четное ли число?", desc:"Функция <code>isEven(n)</code> возвращает <code>true</code>, если число четное.", starter:"function isEven(n) {\n  // твой код\n}", test:(fn)=>fn(2)===true && fn(3)===false && fn(0)===true },
-    { id:5, title:"Максимум из двух", desc:"Функция <code>max(a, b)</code> возвращает большее число.", starter:"function max(a, b) {\n  // твой код\n}", test:(fn)=>fn(5,3)===5 && fn(1,9)===9 && fn(-1,-5)===-1 },
-    { id:6, title:"Длина строки", desc:"Функция <code>length(str)</code> возвращает длину строки.", starter:"function length(str) {\n  // твой код\n}", test:(fn)=>fn("hello")===5 && fn("")===0 && fn("Xcortex")===7 },
-    { id:7, title:"Конвертер °C → °F", desc:"Функция <code>cToF(c)</code> переводит Цельсии в Фаренгейты: F = C * 9/5 + 32", starter:"function cToF(c) {\n  // твой код\n}", test:(fn)=>fn(0)===32 && fn(100)===212 && fn(20)===68 },
-    { id:8, title:"Первая буква заглавная", desc:"Функция <code>capitalize(str)</code> делает первую букву заглавной.", starter:"function capitalize(str) {\n  // твой код\n}", test:(fn)=>fn("hello")==="Hello" && fn("xcortex")==="Xcortex" && fn("a")==="A" },
-    { id:9, title:"Развернуть строку", desc:"Функция <code>reverse(str)</code> возвращает строку задом наперед.", starter:"function reverse(str) {\n  // твой код\n}", test:(fn)=>fn("hello")==="olleh" && fn("abc")==="cba" && fn("a")==="a" },
-    { id:10, title:"Факториал", desc:"Функция <code>factorial(n)</code> возвращает n! (5! = 120)", starter:"function factorial(n) {\n  // твой код\n}", test:(fn)=>fn(0)===1 && fn(1)===1 && fn(5)===120 && fn(6)===720 },
-    { id:11, title:"Число Фибоначчи", desc:"Функция <code>fib(n)</code> возвращает n-е число Фибоначчи (0,1,1,2,3,5...)", starter:"function fib(n) {\n  // твой код\n}", test:(fn)=>fn(0)===0 && fn(1)===1 && fn(6)===8 && fn(10)===55 },
-    { id:12, title:"Простое число", desc:"Функция <code>isPrime(n)</code> возвращает <code>true</code>, если число простое.", starter:"function isPrime(n) {\n  // твой код\n}", test:(fn)=>fn(2)===true && fn(7)===true && fn(4)===false && fn(1)===false },
-    { id:13, title:"Сумма массива", desc:"Функция <code>sumArray(arr)</code> возвращает сумму всех элементов массива.", starter:"function sumArray(arr) {\n  // твой код\n}", test:(fn)=>fn([1,2,3])===6 && fn([])===0 && fn([10])===10 },
-    { id:14, title:"Максимум массива", desc:"Функция <code>maxArray(arr)</code> возвращает максимальный элемент.", starter:"function maxArray(arr) {\n  // твой код\n}", test:(fn)=>fn([1,5,3])===5 && fn([-1,-5,-2])===-1 && fn([7])===7 },
-    { id:15, title:"Фильтр четных", desc:"Функция <code>filterEven(arr)</code> возвращает массив только из четных чисел.", starter:"function filterEven(arr) {\n  // твой код\n}", test:(fn)=>{const r=fn([1,2,3,4,5,6]); return r.length===3 && r[0]===2 && r[2]===6;} },
-    { id:16, title:"Уникальные элементы", desc:"Функция <code>unique(arr)</code> удаляет дубликаты из массива.", starter:"function unique(arr) {\n  // твой код\n}", test:(fn)=>{const r=fn([1,2,2,3,3,3]); return r.length===3 && r.includes(1) && r.includes(2) && r.includes(3);} },
-    { id:17, title:"Подсчет гласных", desc:"Функция <code>countVowels(str)</code> считает количество гласных (a,e,i,o,u).", starter:"function countVowels(str) {\n  // твой код\n}", test:(fn)=>fn("hello")===2 && fn("xcortex")===2 && fn("aeiou")===5 },
-    { id:18, title:"Палиндром", desc:"Функция <code>isPalindrome(str)</code> проверяет, читается ли строка одинаково с обеих сторон.", starter:"function isPalindrome(str) {\n  // твой код\n}", test:(fn)=>fn("radar")===true && fn("hello")===false && fn("a")===true },
-    { id:19, title:"Подсчет слов", desc:"Функция <code>countWords(str)</code> считает количество слов в строке.", starter:"function countWords(str) {\n  // твой код\n}", test:(fn)=>fn("hello world")===2 && fn("one")===1 && fn("")===0 },
-    { id:20, title:"FizzBuzz", desc:"Функция <code>fizzBuzz(n)</code> возвращает: 'Fizz' если делится на 3, 'Buzz' если на 5, 'FizzBuzz' если на оба, иначе само число.", starter:"function fizzBuzz(n) {\n  // твой код\n}", test:(fn)=>fn(3)==="Fizz" && fn(5)==="Buzz" && fn(15)==="FizzBuzz" && fn(7)===7 },
-    { id:21, title:"Анаграмма", desc:"Функция <code>isAnagram(a, b)</code> проверяет, являются ли строки анаграммами.", starter:"function isAnagram(a, b) {\n  // твой код\n}", test:(fn)=>fn("listen","silent")===true && fn("hello","world")===false && fn("abc","cba")===true },
-    { id:22, title:"Flatten массива", desc:"Функция <code>flatten(arr)</code> превращает вложенный массив в плоский. Пример: <code>[[1,2],[3,[4]]]</code> → <code>[1,2,3,4]</code>", starter:"function flatten(arr) {\n  // твой код\n}", test:(fn)=>{const r=fn([[1,2],[3,[4,5]]]); return JSON.stringify(r)==="[1,2,3,4,5]";} },
-    { id:23, title:"Частота символов", desc:"Функция <code>charFreq(str)</code> возвращает объект с частотой каждого символа.", starter:"function charFreq(str) {\n  // твой код\n}", test:(fn)=>{const r=fn("aab"); return r.a===2 && r.b===1;} },
-    { id:24, title:"Клонирование объекта", desc:"Функция <code>deepClone(obj)</code> возвращает глубокую копию объекта.", starter:"function deepClone(obj) {\n  // твой код\n}", test:(fn)=>{const o={a:1,b:{c:2}}; const c=fn(o); return c.a===1 && c.b.c===2 && c!==o && c.b!==o.b;} },
-    { id:25, title:"Финальный босс: Debounce", desc:"Функция <code>debounce(fn, delay)</code> возвращает новую функцию, которая откладывает вызов fn на delay мс. (Проверка: возвращает ли функция функцию)", starter:"function debounce(fn, delay) {\n  // твой код\n}", test:(fn)=>typeof fn(()=>{}, 100) === "function" }
+    { id:1, title:"Заголовок", desc:"Создай заголовок первого уровня с текстом 'Привет, мир'. Используй тег <code>&lt;h1&gt;</code>.", starter:"", check:(code)=>code.includes("<h1>") && code.includes("</h1>") && code.includes("Привет") },
+    { id:2, title:"Абзац текста", desc:"Напиши абзац с любым текстом, используя тег <code>&lt;p&gt;</code>.", starter:"", check:(code)=>code.includes("<p>") && code.includes("</p>") },
+    { id:3, title:"Жирный текст", desc:"Сделай слово 'Важно' жирным, используя тег <code>&lt;b&gt;</code> или <code>&lt;strong&gt;</code>.", starter:"", check:(code)=>code.includes("<b>") || code.includes("<strong>") },
+    { id:4, title:"Курсив", desc:"Напиши текст курсивом, используя тег <code>&lt;i&gt;</code> или <code>&lt;em&gt;</code>.", starter:"", check:(code)=>code.includes("<i>") || code.includes("<em>") },
+    { id:5, title:"Кнопка", desc:"Создай кнопку с надписью 'Нажми меня'. Используй тег <code>&lt;button&gt;</code>.", starter:"", check:(code)=>code.includes("<button>") && code.includes("</button>") },
+    { id:6, title:"Ссылка", desc:"Создай ссылку на Google. Используй тег <code>&lt;a href='...'&gt;</code>.", starter:"", check:(code)=>code.includes("<a") && code.includes("href") },
+    { id:7, title:"Картинка", desc:"Вставь картинку. Используй тег <code>&lt;img src='...'&gt;</code>. Ссылка может быть любой.", starter:"", check:(code)=>code.includes("<img") && code.includes("src") },
+    { id:8, title:"Маркированный список", desc:"Создай список из 3 пунктов, используя <code>&lt;ul&gt;</code> и <code>&lt;li&gt;</code>.", starter:"", check:(code)=>code.includes("<ul>") && code.includes("<li>") },
+    { id:9, title:"Нумерованный список", desc:"Создай нумерованный список, используя <code>&lt;ol&gt;</code> и <code>&lt;li&gt;</code>.", starter:"", check:(code)=>code.includes("<ol>") && code.includes("<li>") },
+    { id:10, title:"Поле ввода", desc:"Добавь поле для ввода текста. Используй тег <code>&lt;input&gt;</code>.", starter:"", check:(code)=>code.includes("<input") },
+    { id:11, title:"Чекбокс", desc:"Создай чекбокс (галочку). Используй <code>&lt;input type='checkbox'&gt;</code>.", starter:"", check:(code)=>code.includes("checkbox") },
+    { id:12, title:"Радио-кнопка", desc:"Создай радио-кнопку. Используй <code>&lt;input type='radio'&gt;</code>.", starter:"", check:(code)=>code.includes("radio") },
+    { id:13, title:"Выпадающий список", desc:"Создай выпадающий список с помощью <code>&lt;select&gt;</code> и <code>&lt;option&gt;</code>.", starter:"", check:(code)=>code.includes("<select>") && code.includes("<option>") },
+    { id:14, title:"Текстовая область", desc:"Добавь большое поле для текста. Используй тег <code>&lt;textarea&gt;</code>.", starter:"", check:(code)=>code.includes("<textarea>") },
+    { id:15, title:"Форма", desc:"Оберни поле ввода и кнопку в тег <code>&lt;form&gt;</code>.", starter:"", check:(code)=>code.includes("<form>") && code.includes("</form>") },
+    { id:16, title:"Разделитель", desc:"Добавь горизонтальную линию. Используй тег <code>&lt;hr&gt;</code>.", starter:"", check:(code)=>code.includes("<hr") },
+    { id:17, title:"Перенос строки", desc:"Сделай перенос строки внутри текста. Используй тег <code>&lt;br&gt;</code>.", starter:"", check:(code)=>code.includes("<br") },
+    { id:18, title:"Подчеркивание", desc:"Подчеркни текст. Используй тег <code>&lt;u&gt;</code>.", starter:"", check:(code)=>code.includes("<u>") },
+    { id:19, title:"Верхний индекс", desc:"Напиши формулу воды H2O, где 2 — верхний индекс (<code>&lt;sup&gt;</code>).", starter:"", check:(code)=>code.includes("<sup>") },
+    { id:20, title:"Нижний индекс", desc:"Напиши логарифм log2x, где 2 — нижний индекс (<code>&lt;sub&gt;</code>).", starter:"", check:(code)=>code.includes("<sub>") },
+    { id:21, title:"Цитата", desc:"Оформи текст как цитату, используя тег <code>&lt;blockquote&gt;</code>.", starter:"", check:(code)=>code.includes("<blockquote>") },
+    { id:22, title:"Таблица", desc:"Создай простую таблицу с одной ячейкой. Используй <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code>, <code>&lt;td&gt;</code>.", starter:"", check:(code)=>code.includes("<table>") && code.includes("<tr>") && code.includes("<td>") },
+    { id:23, title:"Заголовок таблицы", desc:"Добавь заголовок в таблицу, используя тег <code>&lt;th&gt;</code>.", starter:"", check:(code)=>code.includes("<th>") },
+    { id:24, title:"Контейнер Div", desc:"Оберни любой текст в универсальный контейнер <code>&lt;div&gt;</code>.", starter:"", check:(code)=>code.includes("<div>") },
+    { id:25, title:"Span внутри текста", desc:"Выдели часть слова цветом, обернув её в <code>&lt;span&gt;</code>.", starter:"", check:(code)=>code.includes("<span>") }
 ];
 
 let currentTask = null;
@@ -533,31 +600,28 @@ function runTests() {
     if (!currentTask) return;
     const code = document.getElementById('task-code-input').value;
     const result = document.getElementById('test-result');
+
+    if (!code.trim()) {
+        result.className = 'test-result error';
+        result.textContent = '⚠️ Поле пустое. Напиши код, чтобы проверить задание.';
+        return;
+    }
+
     try {
-        // Создаем функцию, которая возвращает тестируемую функцию
-        const wrappedCode = code + '\n; return ' + getFunctionName(code) + ';';
-        const userFn = new Function(wrappedCode)();
-        if (typeof userFn !== 'function') throw new Error("Функция не найдена или не экспортирована");
-        const passed = currentTask.test(userFn);
-        if (passed) {
+        if (currentTask.check(code)) {
             result.className = 'test-result success';
-            result.textContent = '✅ Отлично! Все тесты пройдены. Задание выполнено!';
+            result.textContent = '✅ Отлично! Задание выполнено верно.';
             progress[currentTask.id] = true;
             localStorage.setItem('xcortex_progress', JSON.stringify(progress));
             renderTasksList();
         } else {
             result.className = 'test-result error';
-            result.textContent = '❌ Код работает, но результат неверный. Проверь логику.';
+            result.textContent = '❌ Что-то не так. Проверь, все ли теги ты использовал правильно.';
         }
     } catch (e) {
         result.className = 'test-result error';
-        result.textContent = '❌ Ошибка: ' + e.message;
+        result.textContent = '❌ Ошибка проверки: ' + e.message;
     }
-}
-
-function getFunctionName(code) {
-    const match = code.match(/function\s+(\w+)\s*\(/);
-    return match ? match[1] : null;
 }
 
 function resetTask() {
@@ -565,6 +629,44 @@ function resetTask() {
     document.getElementById('task-code-input').value = currentTask.starter;
     localStorage.removeItem('xcortex_task_' + currentTask.id);
     document.getElementById('test-result').className = 'test-result';
+    document.getElementById('test-result').textContent = '';
+}
+
+// ============ ПОЛНЫЙ СБРОС ============
+function confirmResetAll() {
+    document.getElementById('confirm-reset-modal').style.display = 'flex';
+}
+
+function closeConfirmReset() {
+    document.getElementById('confirm-reset-modal').style.display = 'none';
+}
+
+function executeResetAll() {
+    // 1. Удаляем ВСЕ ключи Xcortex из localStorage
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('xcortex_')) {
+            keysToRemove.push(key);
+        }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+    // 2. Сбрасываем переменную прогресса
+    progress = {};
+
+    // 3. Очищаем редактор
+    document.getElementById('task-code-input').value = '';
+    document.getElementById('test-result').className = 'test-result';
+    document.getElementById('test-result').textContent = '';
+
+    // 4. Перерисовываем список заданий
+    currentTask = null;
+    renderTasksList();
+    selectTask(1);
+
+    // 5. Закрываем модалку
+    closeConfirmReset();
 }
 </script>
 </body>
